@@ -1,0 +1,13 @@
+{
+  "require": {
+    "silex/silex": "^2.0",
+    "doctrine/dbal": "^2.5",
+    "gecko-packages/gecko-silex-config-service": "^2.0",
+    "symfony/yaml": "^3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "DynDns\\": "src/DynDns/"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+# see doctrine DBAL's documentation for parameters:
+# http://silex.sensiolabs.org/doc/2.0/providers/doctrine.html#parameters
+
+driver: pdo_mysql
+host: localhost
+user: db_user
+password: db_pass
+dbname: db_name
