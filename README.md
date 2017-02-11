@@ -3,10 +3,10 @@
 ## Requirements
 - OpenSSL private / public key pair for signing tokens. The following will generate private key `private_key.key` and associated public key `public_key.pem`:
 
-```
-openssl genpkey -algorithm RSA -out private_key.key -pkeyopt rsa_keygen_bits:4096
-openssl rsa -pubout -in private_key.key -out public_key.pem
-```
+    ```
+    openssl genpkey -algorithm RSA -out private_key.key -pkeyopt rsa_keygen_bits:4096
+    openssl rsa -pubout -in private_key.key -out public_key.pem
+    ```
 
 ## Installation
 1.  Run `composer install`
@@ -38,4 +38,4 @@ openssl rsa -pubout -in private_key.key -out public_key.pem
     ```
     The `ipAddress` parameter can be omitted if the IP address used is the client's public IP address.
 
-The client is available at `bin/client.sh`
+The client is available at `bin/client.sh`. Set up environment variables `APIURL`, `DOMAINID`, and `PRIVATEKEY`.
