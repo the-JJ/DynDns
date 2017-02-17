@@ -30,7 +30,6 @@ class PDNSService
      *
      * @param $domainId int
      * @param $data array
-     * @param $ttl int
      */
     public function updateRecord($domainId, array $data)
     {
@@ -59,13 +58,13 @@ class PDNSService
                 $rowFiltered['ttl'] = self::DEFAULT_TTL;
             }
 
-            $rowFiltered['content'] = str_replace('%time%', time(), $rowFiltered['content']);
+            $dnsConfig = $this->app['config']->get('dns');
+            $rowFiltered['content'] = str_replace(
+                ['%ns%', '%noreply%', '%time%'],
+                [$dnsConfig['ns'], $dnsConfig['noreply'], time()],
+                $rowFiltered['content']
+            );
             $this->app['db']->insert('records', $rowFiltered);
         }
-    }
-
-    protected function updateSOA($currentSOA)
-    {
-
     }
 }

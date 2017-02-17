@@ -24,8 +24,8 @@ class AppController implements ControllerProviderInterface
         $factory = $app['controllers_factory'];
 
         // Routes are defined here
-        $factory->get('/', 'DynDns\AppController::clientIp');
-        $factory->get('/{domainId}', 'DynDns\AppController::getDomain');
+        $factory->get('/myip', 'DynDns\AppController::clientIp');
+        $factory->get('/domain/{domainId}', 'DynDns\AppController::getDomain');
         $factory->get('/token/{domainId}', 'DynDns\AppController::getToken');
         $factory->post('/update/{domainId}', 'DynDns\AppController::pushUpdate');
         return $factory;
@@ -38,21 +38,10 @@ class AppController implements ControllerProviderInterface
 
     public function getDomain(Application $app, $domainId)
     {
-        $result = $app['db']->executeQuery('SELECT `content` FROM records WHERE domain_id = ? AND `type`="A"',
+        $result = $app['db']->fetchAll('SELECT domain_id, name, type, content, ttl, change_date FROM records WHERE domain_id = ?',
             [$domainId]);
 
-        $ips = [];
-        while ($row = $result->fetchColumn()) {
-            $ips[] = $row;
-        }
-
-        if (count($ips) === 0) {
-            return new Response();
-        }
-        if (count($ips) === 1) {
-            return new Response($ips[0]);
-        }
-        return new JsonResponse($ips);
+        return new JsonResponse($result);
     }
 
     public function getToken(Application $app, Request $request, $domainId)
@@ -81,12 +70,12 @@ class AppController implements ControllerProviderInterface
             $app['pdns']->updateRecord(
                 $domainId,
                 [
-                    ['type' => 'SOA', 'content' => 'ns.linetech.hr noreply.linetech.hr %time% 60 60 60 60'],
+                    ['type' => 'SOA', 'content' => '%ns% %noreply% %time% 60 60 60 60'],
                     ['type' => 'A', 'content' => $ipAddress]
                 ]
             );
         } else {
-            throw new \Exception("Invalid signature");
+            throw new \Exception("Invalid signature " . $signature);
         }
 
         return new Response("ok");

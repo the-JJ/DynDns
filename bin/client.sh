@@ -1,12 +1,12 @@
 #!/bin/bash
-APIURL="http://dyndns.juricicjuraj.loc" #no trailing slash
-DOMAINID=1
-PRIVATEKEY="storage/keys/private.key"
+APIURL=""
+DOMAINID=
+PRIVATEKEY=""
 
 ################
 
 token=$(curl -s "$APIURL/token/$DOMAINID?pure")
-ip=$(curl -s "$APIURL")
+ip=$(curl -s "$APIURL/myip")
 
 data=$(mktemp)
 echo "$token|$DOMAINID|$ip" > $data
