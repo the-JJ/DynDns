@@ -13,9 +13,10 @@
 2.  Set up your webserver to point to Silex's webroot (see: http://silex.sensiolabs.org/doc/2.0/web_servers.html)
 3.  Set up PowerDNS with MySQL backend (see: https://blog.heckel.xyz/2016/12/31/your-own-dynamic-dns-server-powerdns-mysql/)
 4.  Copy your public key to `storage/keys/ID.pem`, where `ID` is the domain ID for which the key is associated
-5. Set up config files (located in `config` directory)
+    - if you decide to use password version for this domain, create `storage/keys/ID.password` instead.
+5.  Set up config files (located in `config` directory)
 
-## Usage
+## Usage (keypair version)
 - Client sends a token request to the server: `GET /token/{domainId}`
 - Server responds with s token JSON response:
 
@@ -40,6 +41,19 @@
     The `ipAddress` parameter can be omitted if the IP address used is the client's public IP address.
 
 The client is available at `bin/client.sh`. Set up environment variables `APIURL`, `DOMAINID`, and `PRIVATEKEY`.
+
+## Simple (password-based) version
+This is a simpler, less secure option. Instead of signing a request, client simply sends a hashed password to the server. Use this only over SSL.
+
+- Client sends an update request to the server: `POST /update-simple/{domainId}`, with the following body:
+
+    ```
+    ipAddress: {ipAddress}
+    password: {password}
+    ```
+    The `ipAddress` parameter can be omitted if the IP address used is the client's public IP address.
+
+The simple client is available at `bin/client-simple.sh`. Set up environment variables `APIURL`, `DOMAINID`, and `PASSWORDHASH`.
 
 # API endpoints
 
@@ -107,6 +121,21 @@ The message to sign should be in the following format (ending with \n):
 ### Example request body:
     ```
     signature:yi4KiTZYTqxzI9jGszje2fONa2RSlYNXjnNuuuDzVhYEnq/KFUF+CgSuGvSSu0pBDBDO5blbTbvQjsq9dzE8H1/xmsy/KMre3OlgdyHWRsOdVk2sm8LeCa+8JT1ZflF6k4eJjYS5qlV3F+3mjjuiqk/6rSw//i8IVWzZDcAUr+Q=
+    ```
+
+### Example response:
+    ```
+    ok
+    ```
+
+## POST /update-simple/:domainId:
+Pushes the NS update to server. The server will only accept the request if it contains a valid password, and password file exists for the selected domain.
+
+For simplicity, keep the password to alphanumeric characters (but it can be long).
+
+### Example request body:
+    ```
+    password:ThisIsMyPassword
     ```
 
 ### Example response:

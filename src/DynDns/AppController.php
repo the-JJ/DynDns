@@ -9,6 +9,7 @@ use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AppController implements ControllerProviderInterface
 {
@@ -28,6 +29,7 @@ class AppController implements ControllerProviderInterface
         $factory->get('/domain/{domainId}', 'DynDns\AppController::getDomain');
         $factory->get('/token/{domainId}', 'DynDns\AppController::getToken');
         $factory->post('/update/{domainId}', 'DynDns\AppController::pushUpdate');
+        $factory->post('/update-simple/{domainId}', 'DynDns\AppController::pushUpdateSimple');
         return $factory;
     }
 
@@ -79,5 +81,31 @@ class AppController implements ControllerProviderInterface
         }
 
         return new Response("ok");
+    }
+
+    public function pushUpdateSimple(Application $app, Request $request, $domainId)
+    {
+        if (false === $app['password_file_service']->supportsPasswordAuth($domainId)) {
+            throw new UnauthorizedHttpException("Domain does not support password auth.");
+        }
+
+        $password = $request->get('password');
+        $ipAddress = $request->get('ip', $request->getClientIp());
+
+        $verified = $app['password_file_service']->verify($domainId, $password);
+
+        if ($verified) {
+            $app['pdns']->updateRecord(
+                $domainId,
+                [
+                    ['type' => 'SOA', 'content' => '%ns% %noreply% %time% 60 60 60 60'],
+                    ['type' => 'A', 'content' => $ipAddress]
+                ]
+            );
+        } else {
+            throw new UnauthorizedHttpException("Invalid password.");
+        }
+
+        return new Response("ok" . PHP_EOL);
     }
 }

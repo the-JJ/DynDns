@@ -1,5 +1,6 @@
 <?php
 
+use DynDns\Security\Services\PasswordFileService;
 use DynDns\Security\Services\TokenSignService;
 use DynDns\Services\PDNSService;
 
@@ -24,6 +25,9 @@ $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
 
 $app['token_signer'] = function () use ($app) {
     return new TokenSignService($app);
+};
+$app['password_file_service'] = function () use ($app) {
+    return new PasswordFileService($app);
 };
 $app['pdns'] = function () use ($app) {
     return new PDNSService($app);
